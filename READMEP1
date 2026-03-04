@@ -111,8 +111,36 @@ Assumptions
 - The system is admin-operated.
 - No external libraries or database connections are used.
 
+The application provides a simple GUI to demonstrate all core operations of Phase 1.
+
+Built using Java Swing (compatible with IntelliJ).
+
+The GUI includes:
+- User Management
+- Create a new user (Student / Staff / Guest)
+- View user details
+- List all users
+Event Management
+- Create new events (Workshop, Seminar, Concert)
+- Update event information
+- Cancel events
+- List all events
+- Search/filter events by title or type
+Booking Management
+- Book an event for a user (confirmed or waitlisted based on capacity)
+- Cancel a booking (with automatic promotion from waitlist)
+- View user bookings
+- View event roster (confirmed + waitlist)
+Waitlist Management
+- Add/remove bookings from waitlist
+- Automatic promotion for first waitlisted booking
+- View waitlist for selected events
+
+All GUI actions directly interact with the underlying core logic (classes from the Model package), demonstrating full object-oriented design.
+The interface is menu-driven and provides clear notifications for operations like booking confirmation, waitlist addition, or cancellations.
+
                
-How to Run the Program
+**** How to Run the Program ****
 1) Open the project in IntelliJ (or any Java IDE).
 2) Ensure all files are inside the src directory.
 3) Run Main.java.
