@@ -194,7 +194,7 @@ public class EventUI {
             if (!input.isEmpty()) c.setAgeRestriction(input);
         }
 
-        System.out.println("✅ Event updated successfully!");
+        System.out.println("Event updated successfully!");
     }
 
     // Cancel Event
@@ -214,7 +214,7 @@ public class EventUI {
         System.out.println("Current Status: " + event.getStatus());
 
         if (event.getStatus().equals("Cancelled")) {
-            System.out.println("⚠️ This event is already cancelled.");
+            System.out.println("This event is already cancelled.");
             return;
         }
 
