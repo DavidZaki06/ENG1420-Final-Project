@@ -9,7 +9,7 @@ public class MainUI {
     private BookingUI bookingUI;
     private WaitlistUI waitlistUI;
 
-    // Constructor - this is NOT static
+ 
     public MainUI() {
         scanner = new Scanner(System.in);
         eventUI = new EventUI(scanner);
@@ -18,7 +18,7 @@ public class MainUI {
         waitlistUI = new WaitlistUI(scanner);
     }
 
-    // This is NOT static - it's a regular method
+    
     public void start() {
         while (true) {
             System.out.println("\n" + "=".repeat(60));
