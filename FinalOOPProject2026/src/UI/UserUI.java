@@ -20,7 +20,7 @@ class User {
 
 public class UserUI {
     private Scanner scanner;
-    private ArrayList<User> users;  // Internal storage - NO MANAGER!
+    private ArrayList<User> users;  
 
     public UserUI(Scanner s) {
         this.scanner = s;
