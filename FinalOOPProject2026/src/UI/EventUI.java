@@ -12,17 +12,6 @@ public class EventUI {
         this.scanner = s;
         this.events = new ArrayList<>();
 
-        // Add sample events for testing
-        events.add(new Workshop("W001", "Java Programming", "2024-06-15 14:00",
-                "Room 101", 20, "Active", "Object-Oriented Design"));
-        events.add(new Seminar("S001", "AI in Healthcare", "2024-06-16 10:00",
-                "Auditorium", 50, "Active", "Dr. Sarah Chen"));
-        events.add(new Concert("C001", "Summer Jazz", "2024-06-17 20:00",
-                "Main Stage", 100, "Active", "All Ages"));
-        events.add(new Workshop("W002", "Python Basics", "2024-06-18 09:00",
-                "Lab 202", 15, "Active", "Data Structures"));
-        events.add(new Concert("C002", "Rock Night", "2024-06-19 21:00",
-                "Club House", 75, "Active", "18+"));
     }
 
     public void showMenu() {
