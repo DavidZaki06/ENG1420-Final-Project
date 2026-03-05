@@ -238,7 +238,7 @@ public class EventUI {
         System.out.println("Capacity: " + event.getCapacity() + " | Status: " + event.getStatus());
         System.out.println("=".repeat(60));
 
-        // For now, show placeholder since Booking/Waitlist not ready
+        // For now, placeholder since Booking/Waitlist not ready
         System.out.println("\nCONFIRMED LIST (0/" + event.getCapacity() + "):");
         System.out.println("  (Booking system coming soon)");
 
@@ -317,7 +317,7 @@ public class EventUI {
         displayEventList(events);
     }
 
-    // Helpers
+    // Helper
 
     private Event findEventById(String id) {
         for (Event e : events) {
@@ -327,6 +327,8 @@ public class EventUI {
         }
         return null;
     }
+
+    //Prints Event Summary
 
     private void displayEventSummary(Event e) {
         System.out.println("ID: " + e.getEventId());
@@ -338,6 +340,7 @@ public class EventUI {
         System.out.println("Status: " + e.getStatus());
     }
 
+    //Prints all Events
     private void displayEventList(ArrayList<Event> eventList) {
         System.out.println("\n" + "-".repeat(80));
         System.out.printf("%-6s %-20s %-16s %-15s %-5s %-8s %s\n",
