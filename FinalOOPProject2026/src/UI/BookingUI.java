@@ -22,7 +22,7 @@ class Booking {
 
 public class BookingUI {
     private Scanner scanner;
-    private ArrayList<Booking> bookings;  // Internal storage - NO MANAGER!
+    private ArrayList<Booking> bookings;  
 
     public BookingUI(Scanner s) {
         this.scanner = s;
