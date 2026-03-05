@@ -119,9 +119,6 @@ public class UserUI {
         System.out.println("Type: " + user.type);
         System.out.println("Booking Limit: " + limit);
 
-        // Note: Bookings will come from BookingUI later
-        System.out.println("\nCurrent Bookings:");
-        System.out.println("  (View in Booking Management)");
     }
 
     private void listAllUsers() {
