@@ -129,7 +129,7 @@ public class BookingUI {
             for (Booking b : bookings) {
                 if (b.eventId.equals(eventId) && b.status.equals("Waitlisted")) {
                     b.status = "Confirmed";
-                    System.out.println("🔄 User " + b.userId + " promoted from waitlist!");
+                    System.out.println("User " + b.userId + " promoted from waitlist!");
                     break;
                 }
             }
