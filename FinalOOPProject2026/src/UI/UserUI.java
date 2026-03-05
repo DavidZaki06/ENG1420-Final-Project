@@ -26,10 +26,6 @@ public class UserUI {
         this.scanner = s;
         this.users = new ArrayList<>();
 
-        // Sample data
-        users.add(new User("U001", "John Student", "john@uoguelph.ca", "Student"));
-        users.add(new User("U002", "Sarah Staff", "sarah@uoguelph.ca", "Staff"));
-        users.add(new User("U003", "Bob Guest", "bob@gmail.com", "Guest"));
     }
 
     public void showMenu() {
