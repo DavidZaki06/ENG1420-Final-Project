@@ -28,11 +28,7 @@ public class BookingUI {
         this.scanner = s;
         this.bookings = new ArrayList<>();
 
-        // Sample data
-        bookings.add(new Booking("B001", "U001", "C001", "Confirmed", "2024-03-15 10:30"));
-        bookings.add(new Booking("B002", "U002", "C001", "Waitlisted", "2024-03-15 11:45"));
-        bookings.add(new Booking("B003", "U001", "S001", "Confirmed", "2024-03-16 09:20"));
-        bookings.add(new Booking("B004", "U003", "C001", "Waitlisted", "2024-03-16 14:30"));
+
     }
 
     public void showMenu() {
@@ -79,12 +75,10 @@ public class BookingUI {
         System.out.print("Enter Event ID: ");
         String eventId = scanner.nextLine();
 
-        // Capacity Check
-        System.out.println("\nSelect result (for demo):");
-        System.out.println("1. Confirmed (event has space)");
-        System.out.println("2. Waitlisted (event is full)");
-        System.out.print("Choice: ");
-        int result = getInt();
+       int confirmedCount = 0;
+    for (Booking b : bookings) {
+        if (b.eventId.equals(eventId) && b.status.equals("Confirmed")) {
+            confirmedCount++;
 
         String status = (result == 1) ? "Confirmed" : "Waitlisted";
         String createdAt = java.time.LocalDateTime.now().toString().substring(0, 16);
