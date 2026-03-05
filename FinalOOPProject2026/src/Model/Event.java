@@ -1,5 +1,10 @@
 package Model; // put this in the "model" package
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public abstract class Event {
 
     // Common attributes for all events
@@ -57,4 +62,45 @@ public abstract class Event {
 
     // Method for event type (will be implemented by subclasses)
     public abstract String getEventType();
+
+    public List<Booking> confirmedBookings = new ArrayList<>();
+    public Queue<Booking> waitlist = new LinkedList<>();
+
+    public List<Booking> getConfirmedBookings() {
+        return confirmedBookings;
+    }
+    public Queue<Booking> getWaitlist() {
+        return waitlist;
+    }
+    public void addToWaitlist(Booking booking) {
+        waitlist.add(booking);
+    }
+    public void addConfirmedBooking(Booking b) {
+        confirmedBookings.add(b);
+    }
+    public void promoteFromWaitlist() {
+
+        if (!waitlist.isEmpty() && confirmedBookings.size() < capacity) {
+
+            Booking promoted = waitlist.poll();
+            promoted.setStatus(BookingStatus.CONFIRMED);
+
+            confirmedBookings.add(promoted);
+        }
+    }
+    public void cancelABooking(Booking booking) {
+
+        if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
+
+            confirmedBookings.remove(booking);
+            booking.cancel();
+
+            promoteFromWaitlist();
+
+        } else if (booking.getBookingStatus() == BookingStatus.WAITLISTED) {
+
+            waitlist.remove(booking);
+            booking.cancel();
+        }
+    }
 }
