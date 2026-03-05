@@ -28,10 +28,6 @@ public class WaitlistUI {
         this.scanner = s;
         this.waitlist = new ArrayList<>();
 
-        // Sample data
-        waitlist.add(new WaitlistEntry("C001", "U002", "B002", 1, "2024-03-15 11:45"));
-        waitlist.add(new WaitlistEntry("C001", "U003", "B004", 2, "2024-03-16 14:30"));
-        waitlist.add(new WaitlistEntry("S001", "U004", "B005", 1, "2024-03-16 09:15"));
     }
 
     public void showMenu() {
