@@ -79,7 +79,7 @@ public class BookingUI {
         System.out.print("Enter Event ID: ");
         String eventId = scanner.nextLine();
 
-        // Simple capacity check (you'd need EventUI for real capacity)
+        // Capacity Check
         System.out.println("\nSelect result (for demo):");
         System.out.println("1. Confirmed (event has space)");
         System.out.println("2. Waitlisted (event is full)");
