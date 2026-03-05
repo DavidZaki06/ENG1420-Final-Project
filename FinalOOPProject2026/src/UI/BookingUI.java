@@ -22,13 +22,11 @@ class Booking {
 
 public class BookingUI {
     private Scanner scanner;
-    private ArrayList<Booking> bookings;  
+    private ArrayList<Booking> bookings;
 
     public BookingUI(Scanner s) {
         this.scanner = s;
         this.bookings = new ArrayList<>();
-
-
     }
 
     public void showMenu() {
@@ -46,11 +44,19 @@ public class BookingUI {
             int choice = getInt();
 
             switch (choice) {
-                case 1: bookEvent(); break;
-                case 2: cancelBooking(); break;
-                case 3: viewUserBookings(); break;
-                case 4: return;
-                default: System.out.println("Invalid choice");
+                case 1:
+                    bookEvent();
+                    break;
+                case 2:
+                    cancelBooking();
+                    break;
+                case 3:
+                    viewUserBookings();
+                    break;
+                case 4:
+                    return;
+                default:
+                    System.out.println("Invalid choice");
             }
         }
     }
@@ -75,12 +81,22 @@ public class BookingUI {
         System.out.print("Enter Event ID: ");
         String eventId = scanner.nextLine();
 
-       int confirmedCount = 0;
-    for (Booking b : bookings) {
-        if (b.eventId.equals(eventId) && b.status.equals("Confirmed")) {
-            confirmedCount++;
+        int confirmedCount = 0;
+        for (Booking b : bookings) {
+            if (b.eventId.equals(eventId) && b.status.equals("Confirmed")) {
+                confirmedCount++;
+            }
+        }
 
-        String status = (result == 1) ? "Confirmed" : "Waitlisted";
+        int capacity = 5;
+        String status;
+
+        if (confirmedCount < capacity) {
+            status = "Confirmed";
+        } else {
+            status = "Waitlisted";
+        }
+
         String createdAt = java.time.LocalDateTime.now().toString().substring(0, 16);
 
         bookings.add(new Booking(bookingId, userId, eventId, status, createdAt));
@@ -171,3 +187,4 @@ public class BookingUI {
         }
     }
 }
+}    
