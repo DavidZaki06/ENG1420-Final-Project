@@ -22,7 +22,7 @@ class WaitlistEntry {
 
 public class WaitlistUI {
     private Scanner scanner;
-    private ArrayList<WaitlistEntry> waitlist;  // Internal storage - NO MANAGER!
+    private ArrayList<WaitlistEntry> waitlist;  
 
     public WaitlistUI(Scanner s) {
         this.scanner = s;
