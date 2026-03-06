@@ -17,7 +17,7 @@ public class BookingUI {
     private ObservableList<Booking> bookingData;
     private ArrayList<Booking> bookings;
 
-    // Need access to users and events from other UI
+    // References to users and events from other panels
     private ArrayList<User> users;
     private ArrayList<Event> events;
 
@@ -31,63 +31,73 @@ public class BookingUI {
         refreshTable();
     }
 
-    // Method to set users from UserUI
+    /**
+     * Connects this UI to the shared users list from MainUI
+     */
     public void setUsers(ArrayList<User> userList) {
         this.users = userList;
     }
 
-    // Method to set events from EventUI
+    /**
+     * Connects this UI to the shared events list from MainUI
+     */
     public void setEvents(ArrayList<Event> eventList) {
         this.events = eventList;
     }
 
+    /**
+     * Sets up the main layout for the Booking Management panel
+     */
     private void initialize() {
         view = new BorderPane();
         view.setPadding(new Insets(10));
 
-        // Title
         Label titleLabel = new Label("Booking Management");
         view.setTop(titleLabel);
 
-        // Table
         setupTable();
-
-        // Buttons
         setupButtonPanel();
     }
 
-
-    //  Table View
+    /**
+     * Creates the table that displays all bookings
+     */
     private void setupTable() {
         tableView = new TableView<>();
 
+        // Booking ID column
         TableColumn<Booking, String> idCol = new TableColumn<>("Booking ID");
         idCol.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getBookingId()));
 
+        // User column - shows the user's name
         TableColumn<Booking, String> userCol = new TableColumn<>("User");
         userCol.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getUserId().getName()));
 
+        // Event column - shows the event title
         TableColumn<Booking, String> eventCol = new TableColumn<>("Event");
         eventCol.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEvent().getTitle()));
 
+        // Status column (Confirmed/Waitlisted/Cancelled)
         TableColumn<Booking, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getBookingStatus().toString()));
 
+        // Creation date column
         TableColumn<Booking, String> dateCol = new TableColumn<>("Created");
         dateCol.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().getCreatedAt().toString().substring(0, 16)));
 
         tableView.getColumns().addAll(idCol, userCol, eventCol, statusCol, dateCol);
         tableView.setItems(bookingData);
-
         view.setCenter(tableView);
     }
 
-    // Button Panel
+    /**
+     * Creates the button panel at the bottom
+     */
     private void setupButtonPanel() {
         HBox buttonPanel = new HBox(10);
         buttonPanel.setPadding(new Insets(10, 0, 0, 0));
@@ -104,6 +114,10 @@ public class BookingUI {
         view.setBottom(buttonPanel);
     }
 
+    /**
+     * Dialog for creating a new booking
+     * Handles capacity checks, waitlist placement, and booking limits
+     */
     private void showBookEventDialog() {
         if (users.isEmpty() || events.isEmpty()) {
             showAlert("Error", "No users or events available. Please add them first.");
@@ -117,14 +131,17 @@ public class BookingUI {
         ButtonType bookButton = new ButtonType("Book", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(bookButton, ButtonType.CANCEL);
 
+        // Form layout
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
 
+        // Booking ID input
         TextField bookingIdField = new TextField();
         bookingIdField.setPromptText("e.g., B001");
 
+        // User dropdown
         ComboBox<User> userCombo = new ComboBox<>();
         userCombo.getItems().addAll(users);
         userCombo.setCellFactory(lv -> new ListCell<User>() {
@@ -142,6 +159,7 @@ public class BookingUI {
             }
         });
 
+        // Event dropdown with capacity info
         ComboBox<Event> eventCombo = new ComboBox<>();
         eventCombo.getItems().addAll(events);
         eventCombo.setCellFactory(lv -> new ListCell<Event>() {
@@ -160,6 +178,7 @@ public class BookingUI {
             }
         });
 
+        // Arrange fields in grid
         int row = 0;
         grid.add(new Label("Booking ID:"), 0, row);
         grid.add(bookingIdField, 1, row++);
@@ -170,15 +189,16 @@ public class BookingUI {
 
         dialog.getDialogPane().setContent(grid);
 
+        // Handle book button click
         dialog.setResultConverter(button -> {
             if (button == bookButton) {
-                // Validate inputs
+                // Validate booking ID
                 if (bookingIdField.getText().trim().isEmpty()) {
                     showAlert("Error", "Booking ID required!");
                     return null;
                 }
 
-                // Check duplicate booking ID
+                // Check for duplicate booking ID
                 for (Booking b : bookings) {
                     if (b.getBookingId().equals(bookingIdField.getText().trim())) {
                         showAlert("Error", "Booking ID already exists!");
@@ -200,14 +220,14 @@ public class BookingUI {
                     return null;
                 }
 
-                // Check if user already booked this event (using BookingService logic)
+                // Check if user already booked this event
                 BookingService service = new BookingService();
                 if (service.alreadyBooked(selectedUser, selectedEvent)) {
                     showAlert("Error", "User already has a booking for this event.");
                     return null;
                 }
 
-                // Check booking limit by user type
+                // Check user's booking limit
                 int confirmedCount = 0;
                 for (Booking b : bookings) {
                     if (b.getUserId().equals(selectedUser) && b.getBookingStatus() == BookingStatus.CONFIRMED) {
@@ -215,15 +235,13 @@ public class BookingUI {
                     }
                 }
 
-                String userType = selectedUser.getUserType();
                 int limit = selectedUser.getBookingLimit();
-
                 if (confirmedCount >= limit) {
-                    showAlert("Error", userType + " booking limit reached (" + limit + ")");
+                    showAlert("Error", selectedUser.getUserType() + " booking limit reached (" + limit + ")");
                     return null;
                 }
 
-                // Create booking
+                // Create new booking
                 Booking newBooking = new Booking();
                 newBooking.Booking(
                         bookingIdField.getText().trim(),
@@ -232,7 +250,7 @@ public class BookingUI {
                         LocalDateTime.now()
                 );
 
-                // Determine status based on capacity
+                // Determine if confirmed or waitlisted based on capacity
                 int availableCapacity = selectedEvent.getCapacity() - selectedEvent.getConfirmedBookings().size();
 
                 if (availableCapacity > 0) {
@@ -248,6 +266,7 @@ public class BookingUI {
             return null;
         });
 
+        // Add booking if creation was successful
         dialog.showAndWait().ifPresent(newBooking -> {
             bookings.add(newBooking);
             refreshTable();
@@ -255,6 +274,7 @@ public class BookingUI {
             if (newBooking.getBookingStatus() == BookingStatus.CONFIRMED) {
                 showAlert("Success", "Booking CONFIRMED!");
             } else {
+                // Calculate waitlist position
                 int position = 0;
                 for (Booking b : newBooking.getEvent().getWaitlist()) {
                     position++;
@@ -265,6 +285,10 @@ public class BookingUI {
         });
     }
 
+    /**
+     * Dialog for canceling an existing booking
+     * Automatically promotes the first waitlisted user if applicable
+     */
     private void showCancelBookingDialog() {
         Booking selected = tableView.getSelectionModel().getSelectedItem();
         if (selected == null) {
@@ -285,7 +309,7 @@ public class BookingUI {
                 // Cancel the booking using event's method
                 event.cancelABooking(selected);
 
-                // Update in bookings list
+                // Update the booking in the local list
                 for (int i = 0; i < bookings.size(); i++) {
                     if (bookings.get(i).getBookingId().equals(selected.getBookingId())) {
                         bookings.set(i, selected);
@@ -296,14 +320,12 @@ public class BookingUI {
                 refreshTable();
                 showAlert("Success", "Booking cancelled!");
 
-                // Check if promotion happened
+                // Check if cancellation triggered a waitlist promotion
                 if (wasConfirmed && !event.getWaitlist().isEmpty()) {
-                    // Get the promoted booking (first in waitlist)
+                    // Find the promoted booking
                     Booking promoted = null;
                     for (Booking b : event.getConfirmedBookings()) {
-                        // Find the one that was just promoted
                         if (b.getBookingStatus() == BookingStatus.CONFIRMED) {
-                            // Check if it was recently added
                             promoted = b;
                         }
                     }
@@ -324,16 +346,22 @@ public class BookingUI {
         });
     }
 
-
+    
+    // Connects this UI to the shared bookings list from MainUI
     public void setBookings(ArrayList<Booking> bookingList) {
         this.bookings = bookingList;
         refreshTable();
     }
+
+   
+    // Refreshes the table with current booking data
     private void refreshTable() {
         bookingData.clear();
         bookingData.addAll(bookings);
     }
 
+   
+    // Shows a simple alert dialog
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
