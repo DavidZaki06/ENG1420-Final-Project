@@ -1,378 +1,489 @@
 package UI;
 
 import Model.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class EventUI {
-    private Scanner scanner;
-    private ArrayList<Event> events;  // Simple storage
+    private BorderPane view;
+    private TableView<Event> tableView;
+    private ObservableList<Event> eventData;
+    private ArrayList<Event> events;
 
-    public EventUI(Scanner s) {
-        this.scanner = s;
+    private TextField searchField;
+    private ComboBox<String> filterCombo;
+
+    public EventUI() {
         this.events = new ArrayList<>();
+        this.eventData = FXCollections.observableArrayList();
 
+        initialize();
+        refreshTable();
     }
 
-    public void showMenu() {
-        while (true) {
-            System.out.println("\n" + "=".repeat(50));
-            System.out.println("          EVENT MANAGEMENT");
-            System.out.println("=".repeat(50));
-            System.out.println("1. Create Event");
-            System.out.println("2. Update Event");
-            System.out.println("3. Cancel Event");
-            System.out.println("4. View Event Roster");
-            System.out.println("5. Search Events by Title");
-            System.out.println("6. Filter Events by Type");
-            System.out.println("7. List All Events");
-            System.out.println("8. Back to Main Menu");
-            System.out.println("-".repeat(50));
-            System.out.print("Choice: ");
+    // Layout of Event Manager
+    private void initialize() {
+        view = new BorderPane();
+        view.setPadding(new Insets(10));
 
-            int choice = getInt();
+        // Top: Title and search/filter
+        VBox top = new VBox(10);
 
-            switch (choice) {
-                case 1: createEvent(); break;
-                case 2: updateEvent(); break;
-                case 3: cancelEvent(); break;
-                case 4: viewEventRoster(); break;
-                case 5: searchByTitle(); break;
-                case 6: filterByType(); break;
-                case 7: listAllEvents(); break;
-                case 8: return;
-                default: System.out.println("Invalid choice");
-            }
-        }
+        Label titleLabel = new Label("Event Management");
+
+        // Search Bar
+        HBox searchBar = new HBox(10);
+        searchField = new TextField();
+        searchField.setPromptText("Search by title..."); // Grey hint text
+
+        // Filter Dropdown
+        filterCombo = new ComboBox<>();
+        filterCombo.getItems().addAll("All", "Workshop", "Seminar", "Concert");
+        filterCombo.setValue("All");
+
+        Button searchBtn = new Button("Search");
+        searchBtn.setOnAction(e -> filterEvents());
+
+        searchBar.getChildren().addAll(new Label("Title:"), searchField,
+                new Label("Type:"), filterCombo, searchBtn);
+
+        top.getChildren().addAll(titleLabel, searchBar);
+        view.setTop(top);
+
+        // Table
+        setupTable();
+
+        // Buttons
+        setupButtonPanel();
     }
 
-    // Create Event
+        // Layout of Table
+    private void setupTable() {
+        tableView = new TableView<>();
 
-    private void createEvent() {
-        System.out.println("\n--- CREATE EVENT ---");
+        TableColumn<Event, String> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEventId()));
 
-        // Get event type
-        System.out.println("Select event type:");
-        System.out.println("1. Workshop");
-        System.out.println("2. Seminar");
-        System.out.println("3. Concert");
-        System.out.print("Choice: ");
-        int type = getInt();
+        TableColumn<Event, String> titleCol = new TableColumn<>("Title");
+        titleCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTitle()));
 
-        // Common fields for all events
-        System.out.print("Enter Event ID: ");
-        String eventId = scanner.nextLine();
+        TableColumn<Event, String> typeCol = new TableColumn<>("Type");
+        typeCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEventType()));
 
-        // Check for duplicate ID
-        if (findEventById(eventId) != null) {
-            System.out.println("Event ID already exists!");
-            return;
-        }
+        TableColumn<Event, String> dateCol = new TableColumn<>("Date/Time");
+        dateCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getDateTime()));
 
-        System.out.print("Enter Title: ");
-        String title = scanner.nextLine();
+        TableColumn<Event, String> locationCol = new TableColumn<>("Location");
+        locationCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getLocation()));
 
-        System.out.print("Enter Date/Time (YYYY-MM-DD HH:MM): ");
-        String dateTime = scanner.nextLine();
+        TableColumn<Event, Integer> capacityCol = new TableColumn<>("Capacity");
+        capacityCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getCapacity()).asObject());
 
-        System.out.print("Enter Location: ");
-        String location = scanner.nextLine();
+        TableColumn<Event, String> statusCol = new TableColumn<>("Status");
+        statusCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatus()));
 
-        System.out.print("Enter Capacity (must be > 0): ");
-        int capacity = getInt();
+        tableView.getColumns().addAll(idCol, titleCol, typeCol, dateCol, locationCol, capacityCol, statusCol);
+        tableView.setItems(eventData);
 
-        if (capacity <= 0) {
-            System.out.println("Capacity must be greater than 0");
-            return;
-        }
-
-        String status = "Active";
-
-        // Create specific event type with its extra field
-        switch (type) {
-            case 1: // Workshop
-                System.out.print("Enter Topic: ");
-                String topic = scanner.nextLine();
-                events.add(new Workshop(eventId, title, dateTime, location,
-                        capacity, status, topic));
-                System.out.println("Workshop created successfully!");
-                break;
-
-            case 2: // Seminar
-                System.out.print("Enter Speaker Name: ");
-                String speaker = scanner.nextLine();
-                events.add(new Seminar(eventId, title, dateTime, location,
-                        capacity, status, speaker));
-                System.out.println("Seminar created successfully!");
-                break;
-
-            case 3: // Concert
-                System.out.print("Enter Age Restriction: ");
-                String age = scanner.nextLine();
-                events.add(new Concert(eventId, title, dateTime, location,
-                        capacity, status, age));
-                System.out.println("Concert created successfully!");
-                break;
-
-            default:
-                System.out.println("Invalid event type");
-        }
-    }
-
-    // Update Event
-
-    private void updateEvent() {
-        System.out.print("\nEnter Event ID to update: ");
-        String eventId = scanner.nextLine();
-
-        Event event = findEventById(eventId);
-        if (event == null) {
-            System.out.println("Event not found!");
-            return;
-        }
-
-        System.out.println("\n--- UPDATING EVENT ---");
-        displayEventSummary(event);
-        System.out.println("\n(Press Enter to keep current value)");
-
-        // Update common fields
-        System.out.print("New Title [" + event.getTitle() + "]: ");
-        String input = scanner.nextLine();
-        if (!input.isEmpty()) event.setTitle(input);
-
-        System.out.print("New Date/Time [" + event.getDateTime() + "]: ");
-        input = scanner.nextLine();
-        if (!input.isEmpty()) event.setDateTime(input);
-
-        System.out.print("New Location [" + event.getLocation() + "]: ");
-        input = scanner.nextLine();
-        if (!input.isEmpty()) event.setLocation(input);
-
-        System.out.print("New Capacity [" + event.getCapacity() + "]: ");
-        input = scanner.nextLine();
-        if (!input.isEmpty()) {
-            try {
-                int newCap = Integer.parseInt(input);
-                if (newCap > 0) {
-                    event.setCapacity(newCap);
-                } else {
-                    System.out.println("Capacity must be > 0");
+        // Double click to view roster
+        tableView.setRowFactory(tv -> {
+            TableRow<Event> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    showRoster(row.getItem());
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid number");
-            }
-        }
+            });
+            return row;
+        });
 
-        // Update type-specific fields
-        if (event instanceof Workshop) {
-            Workshop w = (Workshop) event;
-            System.out.print("New Topic [" + w.getTopic() + "]: ");
-            input = scanner.nextLine();
-            if (!input.isEmpty()) w.setTopic(input);
-
-        } else if (event instanceof Seminar) {
-            Seminar s = (Seminar) event;
-            System.out.print("New Speaker [" + s.getSpeakerName() + "]: ");
-            input = scanner.nextLine();
-            if (!input.isEmpty()) s.setSpeakerName(input);
-
-        } else if (event instanceof Concert) {
-            Concert c = (Concert) event;
-            System.out.print("New Age Restriction [" + c.getAgeRestriction() + "]: ");
-            input = scanner.nextLine();
-            if (!input.isEmpty()) c.setAgeRestriction(input);
-        }
-
-        System.out.println("Event updated successfully!");
+        view.setCenter(tableView);
     }
 
-    // Cancel Event
+    // Button Panel
+    private void setupButtonPanel() {
+        HBox buttonPanel = new HBox(10);
+        buttonPanel.setPadding(new Insets(10, 0, 0, 0));
+
+        Button createBtn = new Button("Create Event");
+        Button updateBtn = new Button("Update Event");
+        Button cancelBtn = new Button("Cancel Event");
+        Button rosterBtn = new Button("View Roster");
+        Button refreshBtn = new Button("Refresh");
+
+        createBtn.setOnAction(e -> showCreateDialog());
+        updateBtn.setOnAction(e -> showUpdateDialog());
+        cancelBtn.setOnAction(e -> cancelEvent());
+        rosterBtn.setOnAction(e -> {
+            Event selected = tableView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showRoster(selected);
+            } else {
+                showAlert("No Selection", "Please select an event.");
+            }
+        });
+        refreshBtn.setOnAction(e -> refreshTable());
+
+        buttonPanel.getChildren().addAll(createBtn, updateBtn, cancelBtn, rosterBtn, refreshBtn);
+        view.setBottom(buttonPanel);
+    }
+
+    // Create Event Button Logic
+    private void showCreateDialog() {
+        Dialog<Event> dialog = new Dialog<>(); // Pop-up Window
+        dialog.setTitle("Create Event");
+        dialog.setHeaderText("Enter event details");
+
+        ButtonType createButton = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(createButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new Insets(20));
+
+        TextField idField = new TextField();  // Textboxes for Event Info
+        TextField titleField = new TextField();
+        TextField dateField = new TextField();
+            dateField.setPromptText("YYYY-MM-DD HH:MM");
+        TextField locationField = new TextField();
+        TextField capacityField = new TextField();
+
+        ComboBox<String> typeCombo = new ComboBox<>(); // Selection Dropdown
+        typeCombo.getItems().addAll("Workshop", "Seminar", "Concert");
+        typeCombo.setValue("Workshop");
+
+        TextField specificField = new TextField();
+        Label specificLabel = new Label("Topic:");
+
+        typeCombo.setOnAction(e -> { // Prompt User for Restriction
+            String type = typeCombo.getValue();
+            if (type.equals("Workshop")) {
+                specificLabel.setText("Topic:");
+                specificField.setPromptText("Enter topic");
+            } else if (type.equals("Seminar")) {
+                specificLabel.setText("Speaker:");
+                specificField.setPromptText("Enter speaker name");
+            } else {
+                specificLabel.setText("Age Restriction:");
+                specificField.setPromptText("Enter age restriction");
+            }
+        });
+
+        // Grid with Selections
+        int row = 0;
+        grid.add(new Label("Event ID:"), 0, row);
+        grid.add(idField, 1, row++);
+        grid.add(new Label("Title:"), 0, row);
+        grid.add(titleField, 1, row++);
+        grid.add(new Label("Date/Time:"), 0, row);
+        grid.add(dateField, 1, row++);
+        grid.add(new Label("Location:"), 0, row);
+        grid.add(locationField, 1, row++);
+        grid.add(new Label("Capacity:"), 0, row);
+        grid.add(capacityField, 1, row++);
+        grid.add(new Label("Type:"), 0, row);
+        grid.add(typeCombo, 1, row++);
+        grid.add(specificLabel, 0, row);
+        grid.add(specificField, 1, row);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // When Create Button pressed, validates entries
+        dialog.setResultConverter(button -> {
+            if (button == createButton) {
+                if (idField.getText().trim().isEmpty() ||
+                        titleField.getText().trim().isEmpty() ||
+                        dateField.getText().trim().isEmpty() ||
+                        locationField.getText().trim().isEmpty() ||
+                        capacityField.getText().trim().isEmpty() ||
+                        specificField.getText().trim().isEmpty()) {
+                    showAlert("Error", "All fields required!");
+                    return null;
+                }
+
+                // Check duplicate
+                for (Event e : events) {
+                    if (e.getEventId().equals(idField.getText().trim())) {
+                        showAlert("Error", "Event ID already exists!");
+                        return null;
+                    }
+                }
+
+                // Validate capacity
+                int capacity;
+                try {
+                    capacity = Integer.parseInt(capacityField.getText().trim());
+                    if (capacity <= 0) throw new NumberFormatException();
+                } catch (NumberFormatException ex) {
+                    showAlert("Error", "Capacity must greater than 0!");
+                    return null;
+                }
+
+                String type = typeCombo.getValue();
+                String id = idField.getText().trim();
+                String title = titleField.getText().trim();
+                String date = dateField.getText().trim();
+                String location = locationField.getText().trim();
+                String specific = specificField.getText().trim();
+
+                // Add event to array
+                switch (type) {
+                    case "Workshop":
+                        return new Workshop(id, title, date, location, capacity, "Active", specific);
+                    case "Seminar":
+                        return new Seminar(id, title, date, location, capacity, "Active", specific);
+                    case "Concert":
+                        return new Concert(id, title, date, location, capacity, "Active", specific);
+                    default:
+                        return null;
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(newEvent -> {
+            events.add(newEvent);
+            refreshTable();
+            showAlert("Success", "Event created!");
+        });
+    }
+
+    // Method for Update Button
+
+    private void showUpdateDialog() {
+        Event selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Error", "Please select an event to update.");
+            return;
+        }
+
+        Dialog<Event> dialog = new Dialog<>(); // Pop out Window
+        dialog.setTitle("Update Event");
+        dialog.setHeaderText("Update: " + selected.getTitle());
+
+        ButtonType updateButton = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(updateButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        TextField titleField = new TextField(selected.getTitle());
+        TextField dateField = new TextField(selected.getDateTime());
+        TextField locationField = new TextField(selected.getLocation());
+        TextField capacityField = new TextField(String.valueOf(selected.getCapacity()));
+
+        int row = 0;
+        grid.add(new Label("Title:"), 0, row);
+        grid.add(titleField, 1, row++);
+        grid.add(new Label("Date/Time:"), 0, row);
+        grid.add(dateField, 1, row++);
+        grid.add(new Label("Location:"), 0, row);
+        grid.add(locationField, 1, row++);
+        grid.add(new Label("Capacity:"), 0, row);
+        grid.add(capacityField, 1, row++);
+
+        // Type-specific field
+        if (selected instanceof Workshop) {
+            Workshop w = (Workshop) selected;
+            TextField topicField = new TextField(w.getTopic());
+            grid.add(new Label("Topic:"), 0, row);
+            grid.add(topicField, 1, row);
+
+            dialog.setResultConverter(button -> {
+                if (button == updateButton) {
+                    w.setTitle(titleField.getText());
+                    w.setDateTime(dateField.getText());
+                    w.setLocation(locationField.getText());
+                    w.setCapacity(Integer.parseInt(capacityField.getText()));
+                    w.setTopic(topicField.getText());
+                    return w;
+                }
+                return null;
+            });
+        } else if (selected instanceof Seminar) {
+            Seminar s = (Seminar) selected;
+            TextField speakerField = new TextField(s.getSpeakerName());
+            grid.add(new Label("Speaker:"), 0, row);
+            grid.add(speakerField, 1, row);
+
+            dialog.setResultConverter(button -> {
+                if (button == updateButton) {
+                    s.setTitle(titleField.getText());
+                    s.setDateTime(dateField.getText());
+                    s.setLocation(locationField.getText());
+                    s.setCapacity(Integer.parseInt(capacityField.getText()));
+                    s.setSpeakerName(speakerField.getText());
+                    return s;
+                }
+                return null;
+            });
+        } else if (selected instanceof Concert) {
+            Concert c = (Concert) selected;
+            TextField ageField = new TextField(c.getAgeRestriction());
+            grid.add(new Label("Age Restriction:"), 0, row);
+            grid.add(ageField, 1, row);
+
+            dialog.setResultConverter(button -> {
+                if (button == updateButton) {
+                    c.setTitle(titleField.getText());
+                    c.setDateTime(dateField.getText());
+                    c.setLocation(locationField.getText());
+                    c.setCapacity(Integer.parseInt(capacityField.getText()));
+                    c.setAgeRestriction(ageField.getText());
+                    return c;
+                }
+                return null;
+            });
+        }
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.showAndWait().ifPresent(updated -> {
+            refreshTable();
+            showAlert("Success", "Event updated!");
+        });
+    }
 
     private void cancelEvent() {
-        System.out.print("\nEnter Event ID to cancel: ");
-        String eventId = scanner.nextLine();
-
-        Event event = findEventById(eventId);
-        if (event == null) {
-            System.out.println("Event not found!");
+        Event selected = tableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Error", "Please select an event to cancel.");
             return;
         }
 
-        System.out.println("\n--- CANCEL EVENT ---");
-        displayEventSummary(event);
-        System.out.println("Current Status: " + event.getStatus());
-
-        if (event.getStatus().equals("Cancelled")) {
-            System.out.println("This event is already cancelled.");
+        if (selected.getStatus().equals("Cancelled")) {
+            showAlert("Already Cancelled", "This event is already cancelled.");
             return;
         }
 
-        System.out.print("\nType 'YES' to confirm cancellation: ");
-        String confirm = scanner.nextLine();
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirm Cancellation");
+        confirm.setHeaderText("Cancel Event: " + selected.getTitle());
+        confirm.setContentText("This will cancel all bookings and clear the waitlist. Continue?");
 
-        if (confirm.equals("YES")) {
-            event.cancelEvent();  // Sets status to "Cancelled"
-            System.out.println("Event has been CANCELLED!");
-            System.out.println("No new bookings can be made for this event.");
-            System.out.println("All existing bookings have been cancelled and waitlist cleared.");
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                selected.cancelEvent();
+                refreshTable();
+                showAlert("Success", "Event cancelled!");
+            }
+        });
+    }
+
+    private void showRoster(Event event) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Event Roster");
+        dialog.setHeaderText(event.getTitle() + " - " + event.getDateTime());
+
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(20));
+
+        // Event info
+        Label infoLabel = new Label(
+                "Location: " + event.getLocation() +
+                        " | Capacity: " + event.getCapacity() +
+                        " | Status: " + event.getStatus()
+        );
+        content.getChildren().add(infoLabel);
+
+        // Confirmed list
+        Label confirmedLabel = new Label("CONFIRMED LIST:");
+        confirmedLabel.setStyle("-fx-font-weight: bold;");
+        content.getChildren().add(confirmedLabel);
+
+        ListView<String> confirmedList = new ListView<>();
+        if (event.getConfirmedBookings().isEmpty()) {
+            confirmedList.getItems().add("No confirmed bookings");
         } else {
-            System.out.println("Cancellation aborted.");
+            for (Booking b : event.getConfirmedBookings()) {
+                confirmedList.getItems().add(b.getUserId() + " - " + b.getBookingId());
+            }
         }
+        confirmedList.setPrefHeight(100);
+        content.getChildren().add(confirmedList);
+
+        // Waitlist
+        Label waitlistLabel = new Label("WAITLIST:");
+        waitlistLabel.setStyle("-fx-font-weight: bold;");
+        content.getChildren().add(waitlistLabel);
+
+        ListView<String> waitlistList = new ListView<>();
+        if (event.getWaitlist().isEmpty()) {
+            waitlistList.getItems().add("No waitlisted users");
+        } else {
+            for (Booking b : event.getWaitlist()) {
+                waitlistList.getItems().add(b.getUserId() + " - " + b.getBookingId());
+            }
+        }
+        waitlistList.setPrefHeight(100);
+        content.getChildren().add(waitlistList);
+
+        dialog.getDialogPane().setContent(content);
+        dialog.showAndWait();
     }
 
-    // View Event Roster
+    // Search and Filter Events
 
-    private void viewEventRoster() {
-        System.out.print("\nEnter Event ID: ");
-        String eventId = scanner.nextLine();
+    private void filterEvents() {
+        String searchText = searchField.getText().toLowerCase();
+        String filterType = filterCombo.getValue();
 
-        Event event = findEventById(eventId);
-        if (event == null) {
-            System.out.println("Event not found!");
-            return;
-        }
+        ArrayList<Event> filtered = new ArrayList<>();
 
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("ROSTER FOR: " + event.getTitle());
-        System.out.println("Date: " + event.getDateTime() + " | Location: " + event.getLocation());
-        System.out.println("Capacity: " + event.getCapacity() + " | Status: " + event.getStatus());
-        System.out.println("=".repeat(60));
-
-        // For now, placeholder since Booking/Waitlist not ready
-        System.out.println("\nCONFIRMED LIST (0/" + event.getCapacity() + "):");
-        System.out.println("  (Booking system coming soon)");
-
-        System.out.println("\nWAITLIST:");
-        System.out.println("  (Waitlist system coming soon)");
-
-
-    }
-
-    // Search By Title
-
-    private void searchByTitle() {
-        System.out.print("\nEnter title to search (partial matches allowed): ");
-        String searchTerm = scanner.nextLine().toLowerCase();
-
-        ArrayList<Event> results = new ArrayList<>();
+        // Check if Search or Filter have been applied
         for (Event e : events) {
-            if (e.getTitle().toLowerCase().contains(searchTerm)) {
-                results.add(e);
+            boolean matchesSearch = searchText.isEmpty() ||
+                    e.getTitle().toLowerCase().contains(searchText);
+            boolean matchesType = filterType.equals("All") ||
+                    e.getEventType().equals(filterType);
+
+            if (matchesSearch && matchesType) {
+                filtered.add(e);
             }
         }
 
-        if (results.isEmpty()) {
-            System.out.println("No events found matching: \"" + searchTerm + "\"");
-        } else {
-            System.out.println("\n--- Search Results for \"" + searchTerm + "\" ---");
-            displayEventList(results);
-        }
+        eventData.clear();
+        eventData.addAll(filtered);
     }
 
-    // Filter by Type
-
-    private void filterByType() {
-        System.out.println("\nSelect event type:");
-        System.out.println("1. Workshop");
-        System.out.println("2. Seminar");
-        System.out.println("3. Concert");
-        System.out.print("Choice: ");
-
-        int type = getInt();
-        String typeName = "";
-
-        switch (type) {
-            case 1: typeName = "Workshop"; break;
-            case 2: typeName = "Seminar"; break;
-            case 3: typeName = "Concert"; break;
-            default:
-                System.out.println("Invalid type");
-                return;
-        }
-
-        ArrayList<Event> results = new ArrayList<>();
-        for (Event e : events) {
-            if (e.getClass().getSimpleName().equals(typeName)) {
-                results.add(e);
-            }
-        }
-
-        if (results.isEmpty()) {
-            System.out.println("No " + typeName + " events found.");
-        } else {
-            System.out.println("\n--- " + typeName + " Events ---");
-            displayEventList(results);
-        }
+    private void refreshTable() {
+        eventData.clear();
+        eventData.addAll(events);
     }
 
-    // List All Events
-
-    private void listAllEvents() {
-        if (events.isEmpty()) {
-            System.out.println("\nNo events found.");
-            return;
-        }
-
-        System.out.println("\n--- ALL EVENTS ---");
-        displayEventList(events);
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
-    // Helper
-
-    private Event findEventById(String id) {
-        for (Event e : events) {
-            if (e.getEventId().equals(id)) {
-                return e;
-            }
-        }
-        return null;
+    public void setEvents(ArrayList<Event> eventList) {
+        this.events = eventList;
+        refreshTable();
     }
 
-    //Prints Event Summary
-
-    private void displayEventSummary(Event e) {
-        System.out.println("ID: " + e.getEventId());
-        System.out.println("Title: " + e.getTitle());
-        System.out.println("Type: " + e.getEventType());
-        System.out.println("When: " + e.getDateTime());
-        System.out.println("Where: " + e.getLocation());
-        System.out.println("Capacity: " + e.getCapacity());
-        System.out.println("Status: " + e.getStatus());
+    public Node getView() {
+        return view;
     }
 
-    //Prints all Events
-    private void displayEventList(ArrayList<Event> eventList) {
-        System.out.println("\n" + "-".repeat(80));
-        System.out.printf("%-6s %-20s %-16s %-15s %-5s %-8s %s\n",
-                "ID", "Title", "Date", "Location", "Cap", "Status", "Type");
-        System.out.println("-".repeat(80));
-
-        for (Event e : eventList) {
-            System.out.printf("%-6s %-20s %-16s %-15s %-5d %-8s %s\n",
-                    e.getEventId(),
-                    truncate(e.getTitle(), 20),
-                    truncate(e.getDateTime(), 16),
-                    truncate(e.getLocation(), 15),
-                    e.getCapacity(),
-                    e.getStatus(),
-                    e.getEventType());
-        }
-    }
-
-    private String truncate(String s, int len) {
-        if (s == null) return "";
-        if (s.length() <= len) return s;
-        return s.substring(0, len-3) + "...";
-    }
-
-    private int getInt() {
-        try {
-            int num = scanner.nextInt();
-            scanner.nextLine();
-            return num;
-        } catch (Exception e) {
-            scanner.nextLine();
-            return -1;
-        }
+    public void refresh() {
+        refreshTable();
     }
 }

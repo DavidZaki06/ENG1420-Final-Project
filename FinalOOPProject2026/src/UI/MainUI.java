@@ -1,68 +1,138 @@
 package UI;
 
-import java.util.Scanner;
+import Model.*;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import java.util.ArrayList;
 
-public class MainUI {
-    private Scanner scanner;
-    private EventUI eventUI;
+public class MainUI extends Application {
+
+    private BorderPane root; // Main Layout
+    private StackPane contentArea; // Area that will hold current panel
+
+    // Create Panels
     private UserUI userUI;
+    private EventUI eventUI;
     private BookingUI bookingUI;
     private WaitlistUI waitlistUI;
 
- 
-    public MainUI() {
-        scanner = new Scanner(System.in);
-        eventUI = new EventUI(scanner);
-        userUI = new UserUI(scanner);
-        bookingUI = new BookingUI(scanner);
-        waitlistUI = new WaitlistUI(scanner);
+    // Shared data
+    private ArrayList<User> users;
+    private ArrayList<Event> events;
+    private ArrayList<Booking> bookings;
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Initialize shared data
+        users = new ArrayList<>();
+        events = new ArrayList<>();
+        bookings = new ArrayList<>();
+
+        // Initialize panels
+        userUI = new UserUI();
+        eventUI = new EventUI();
+        bookingUI = new BookingUI();
+        waitlistUI = new WaitlistUI();
+
+        // Pass data to other UI
+        userUI.setUsers(users);
+        eventUI.setEvents(events);
+        bookingUI.setUsers(users);
+        bookingUI.setEvents(events);
+        bookingUI.setBookings(bookings);
+        waitlistUI.setEvents(events);
+        waitlistUI.setBookings(bookings);
+
+        //Creates layout
+        root = new BorderPane();
+
+        // Create left navigation menu
+        VBox navMenu = createNavigationMenu();
+        root.setLeft(navMenu);
+
+        // Create content area
+        contentArea = new StackPane();
+        contentArea.setStyle("-fx-background-color: white;");
+        contentArea.setPadding(new Insets(20));
+        root.setCenter(contentArea);
+
+        // Show User Management by default
+        showUserManagement();
+
+        // Creates and shows window
+        Scene scene = new Scene(root, 1000, 700);
+        primaryStage.setTitle("Campus Event Booking System");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
-    
-    public void start() {
-        while (true) {
-            System.out.println("\n" + "=".repeat(60));
-            System.out.println("     CAMPUS EVENT BOOKING SYSTEM");
-            System.out.println("=".repeat(60));
-            System.out.println("1. User Management");
-            System.out.println("2. Event Management");
-            System.out.println("3. Booking Management");
-            System.out.println("4. Waitlist Management");
-            System.out.println("5. Exit");
-            System.out.println("-".repeat(60));
-            System.out.print("Enter choice: ");
+    // Create Nav Menu, left side panel
+    private VBox createNavigationMenu() {
+        VBox menu = new VBox(10);
+        menu.setPadding(new Insets(20));
+        menu.setPrefWidth(200);
+        menu.setStyle("-fx-background-color: #2c3e50;");
 
-            int choice = getInt();
+        Label title = new Label("Main Menu");
+        title.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
 
-            switch (choice) {
-                case 1: userUI.showMenu(); break;
-                case 2: eventUI.showMenu(); break;
-                case 3: bookingUI.showMenu(); break;
-                case 4: waitlistUI.showMenu(); break;
-                case 5:
-                    System.out.println("Goodbye!");
-                    return;
-                default:
-                    System.out.println("Invalid choice");
-            }
-        }
+        Button userBtn = createNavButton("User Management");
+        Button eventBtn = createNavButton("Event Management");
+        Button bookingBtn = createNavButton("Booking Management");
+        Button waitlistBtn = createNavButton("Waitlist Management");
+        Button exitBtn = createNavButton("Exit");
+
+        userBtn.setOnAction(e -> showUserManagement());
+        eventBtn.setOnAction(e -> showEventManagement());
+        bookingBtn.setOnAction(e -> showBookingManagement());
+        waitlistBtn.setOnAction(e -> showWaitlistManagement());
+        exitBtn.setOnAction(e -> System.exit(0));
+
+        menu.getChildren().addAll(title, userBtn, eventBtn, bookingBtn, waitlistBtn, exitBtn);
+        return menu;
     }
 
-    private int getInt() {
-        try {
-            int num = scanner.nextInt();
-            scanner.nextLine();
-            return num;
-        } catch (Exception e) {
-            scanner.nextLine();
-            return -1;
-        }
+    // Initialize Nav Menu Buttons
+    private Button createNavButton(String text) {
+        Button btn = new Button(text);
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10;");
+
+        // Mouse hover colour change
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #3d566e; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10;"));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10;"));
+        return btn;
     }
 
+    private void showUserManagement() {
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(userUI.getView());
+        userUI.refresh();
+    }
+
+    private void showEventManagement() {
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(eventUI.getView());
+        eventUI.refresh();
+    }
+
+    private void showBookingManagement() {
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(bookingUI.getView());
+        bookingUI.refresh();
+    }
+
+    private void showWaitlistManagement() {
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(waitlistUI.getView());
+        waitlistUI.refresh();
+    }
 
     public static void main(String[] args) {
-
-        MainUI ui = new MainUI();  // Create instance
-        ui.start();                 // Call method on instance
+        launch(args);
     }
 }

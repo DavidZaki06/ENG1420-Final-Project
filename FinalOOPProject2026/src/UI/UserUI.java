@@ -1,155 +1,218 @@
 package UI;
 
+import Model.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
 import java.util.ArrayList;
-import java.util.Scanner;
-
-// Simple internal User class - delete once user method provided
-class User {
-    String userId;
-    String name;
-    String email;
-    String type; // Student, Staff, Guest
-
-    User(String id, String name, String email, String type) {
-        this.userId = id;
-        this.name = name;
-        this.email = email;
-        this.type = type;
-    }
-}
 
 public class UserUI {
-    private Scanner scanner;
-    private ArrayList<User> users;  
+    private BorderPane view;
+    private TableView<User> tableView;
+    private ObservableList<User> userData;
+    private ArrayList<User> users;
 
-    public UserUI(Scanner s) {
-        this.scanner = s;
+    public UserUI() {
         this.users = new ArrayList<>();
+        this.userData = FXCollections.observableArrayList();
 
+        initialize();
+        refreshTable();
     }
 
-    public void showMenu() {
-        while (true) {
-            System.out.println("\n" + "=".repeat(50));
-            System.out.println("          USER MANAGEMENT");
-            System.out.println("=".repeat(50));
-            System.out.println("1. Add User");
-            System.out.println("2. View User Details");
-            System.out.println("3. List All Users");
-            System.out.println("4. Back to Main Menu");
-            System.out.println("-".repeat(50));
-            System.out.print("Choice: ");
+    private void initialize() {
+        view = new BorderPane();
+        view.setPadding(new Insets(10));
 
-            int choice = getInt();
+        // Title
+        Label titleLabel = new Label("User Management");
+        view.setTop(titleLabel);
 
-            switch (choice) {
-                case 1: addUser(); break;
-                case 2: viewUserDetails(); break;
-                case 3: listAllUsers(); break;
-                case 4: return;
-                default: System.out.println("Invalid choice");
+        // Table
+        setupTable();
+
+        // Buttons
+        setupButtonPanel();
+    }
+
+    // Table View
+    private void setupTable() {
+        tableView = new TableView<>();
+
+        TableColumn<User, String> idCol = new TableColumn<>("User ID");
+        idCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getUserId()));
+
+        TableColumn<User, String> nameCol = new TableColumn<>("Name");
+        nameCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getName()));
+
+        TableColumn<User, String> emailCol = new TableColumn<>("Email");
+        emailCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEmail()));
+
+        TableColumn<User, String> typeCol = new TableColumn<>("Type");
+        typeCol.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getUserType()));
+
+        tableView.getColumns().addAll(idCol, nameCol, emailCol, typeCol);
+        tableView.setItems(userData);
+
+        view.setCenter(tableView);
+    }
+
+    // Button Panel
+    private void setupButtonPanel() {
+        HBox buttonPanel = new HBox(10);
+        buttonPanel.setPadding(new Insets(10, 0, 0, 0));
+
+        Button addBtn = new Button("Add User");
+        Button viewBtn = new Button("View Details");
+        Button listBtn = new Button("List All");
+        Button refreshBtn = new Button("Refresh");
+
+        addBtn.setOnAction(e -> showAddUserDialog());
+        viewBtn.setOnAction(e -> {
+            User selected = tableView.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showUserDetails(selected);
+            } else {
+                showAlert("No Selection", "Please select a user.");
             }
-        }
+        });
+        listBtn.setOnAction(e -> refreshTable());
+        refreshBtn.setOnAction(e -> refreshTable());
+
+        buttonPanel.getChildren().addAll(addBtn, viewBtn, listBtn, refreshBtn);
+        view.setBottom(buttonPanel);
     }
 
-    private void addUser() {
-        System.out.println("\n--- ADD USER ---");
+    private void showAddUserDialog() {
+        Dialog<User> dialog = new Dialog<>();
+        dialog.setTitle("Add User");
+        dialog.setHeaderText("Enter user information");
 
-        System.out.println("Select user type:");
-        System.out.println("1. Student");
-        System.out.println("2. Staff");
-        System.out.println("3. Guest");
-        System.out.print("Choice: ");
-        int type = getInt();
+        // Initialize Button
+        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
 
-        String typeStr = type == 1 ? "Student" : type == 2 ? "Staff" : type == 3 ? "Guest" : null;
-        if (typeStr == null) {
-            System.out.println("Invalid type");
-            return;
-        }
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
 
-        System.out.print("Enter User ID: ");
-        String userId = scanner.nextLine();
+        TextField idField = new TextField();
+        TextField nameField = new TextField();
+        TextField emailField = new TextField();
 
-        // Check for duplicate ID
-        for (User u : users) {
-            if (u.userId.equals(userId)) {
-                System.out.println("User ID already exists!");
-                return;
+        ComboBox<String> typeCombo = new ComboBox<>();
+        typeCombo.getItems().addAll("Student", "Staff", "Guest");
+        typeCombo.setValue("Student");
+
+        grid.add(new Label("User ID:"), 0, 0);
+        grid.add(idField, 1, 0);
+        grid.add(new Label("Name:"), 0, 1);
+        grid.add(nameField, 1, 1);
+        grid.add(new Label("Email:"), 0, 2);
+        grid.add(emailField, 1, 2);
+        grid.add(new Label("Type:"), 0, 3);
+        grid.add(typeCombo, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButton) {
+                // Check empty
+                if (idField.getText().trim().isEmpty() ||
+                        nameField.getText().trim().isEmpty() ||
+                        emailField.getText().trim().isEmpty()) {
+                    showAlert("Error", "All fields required!");
+                    return null;
+                }
+
+                // Check duplicate
+                for (User u : users) {
+                    if (u.getUserId().equals(idField.getText().trim())) {
+                        showAlert("Error", "ID already exists!");
+                        return null;
+                    }
+                }
+
+                String type = typeCombo.getValue();
+                String id = idField.getText().trim();
+                String name = nameField.getText().trim();
+                String email = emailField.getText().trim();
+
+                // Add to Array
+                switch (type) {
+                    case "Student": return new Student(id, name, email);
+                    case "Staff": return new Staff(id, name, email);
+                    default: return new Guest(id, name, email);
+                }
             }
-        }
+            return null;
+        });
 
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
-
-        users.add(new User(userId, name, email, typeStr));
-        System.out.println("User added successfully!");
+        dialog.showAndWait().ifPresent(newUser -> {
+            users.add(newUser);
+            refreshTable();
+            showAlert("Success", "User added!");
+        });
     }
 
-    private void viewUserDetails() {
-        System.out.print("\nEnter User ID: ");
-        String userId = scanner.nextLine();
+    // Display for User Details
+    private void showUserDetails(User user) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("User Details");
 
-        User user = null;
-        for (User u : users) {
-            if (u.userId.equals(userId)) {
-                user = u;
-                break;
-            }
-        }
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
 
-        if (user == null) {
-            System.out.println("User not found!");
-            return;
-        }
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
 
-        int limit = user.type.equals("Student") ? 3 : user.type.equals("Staff") ? 5 : 1;
+        grid.add(new Label("User ID:"), 0, 0);
+        grid.add(new Label(user.getUserId()), 1, 0);
+        grid.add(new Label("Name:"), 0, 1);
+        grid.add(new Label(user.getName()), 1, 1);
+        grid.add(new Label("Email:"), 0, 2);
+        grid.add(new Label(user.getEmail()), 1, 2);
+        grid.add(new Label("Type:"), 0, 3);
+        grid.add(new Label(user.getUserType()), 1, 3);
+        grid.add(new Label("Booking Limit:"), 0, 4);
+        grid.add(new Label(String.valueOf(user.getBookingLimit())), 1, 4);
 
-        System.out.println("\n--- USER DETAILS ---");
-        System.out.println("ID: " + user.userId);
-        System.out.println("Name: " + user.name);
-        System.out.println("Email: " + user.email);
-        System.out.println("Type: " + user.type);
-        System.out.println("Booking Limit: " + limit);
-
+        dialog.getDialogPane().setContent(grid);
+        dialog.showAndWait();
     }
 
-    private void listAllUsers() {
-        if (users.isEmpty()) {
-            System.out.println("\nNo users found.");
-            return;
-        }
-
-        System.out.println("\n--- ALL USERS ---");
-        System.out.printf("%-6s %-20s %-25s %-10s\n",
-                "ID", "Name", "Email", "Type");
-        System.out.println("-".repeat(65));
-
-        for (User u : users) {
-            System.out.printf("%-6s %-20s %-25s %-10s\n",
-                    u.userId,
-                    truncate(u.name, 20),
-                    truncate(u.email, 25),
-                    u.type);
-        }
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
-    private String truncate(String s, int len) {
-        if (s == null || s.length() <= len) return s;
-        return s.substring(0, len-3) + "...";
+    public void setUsers(ArrayList<User> userList) {
+        this.users = userList;
+        refreshTable();
+    }
+    private void refreshTable() {
+        userData.clear();
+        userData.addAll(users);
     }
 
-    private int getInt() {
-        try {
-            int num = scanner.nextInt();
-            scanner.nextLine();
-            return num;
-        } catch (Exception e) {
-            scanner.nextLine();
-            return -1;
-        }
+    public Node getView() {
+        return view;
+    }
+
+    public void refresh() {
+        refreshTable();
     }
 }
