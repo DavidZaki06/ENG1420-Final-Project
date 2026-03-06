@@ -91,6 +91,7 @@ public class UserUI {
         view.setBottom(buttonPanel);
     }
 
+    // Dialog for adding a new user
     private void showAddUserDialog() {
         Dialog<User> dialog = new Dialog<>();
         dialog.setTitle("Add User");
@@ -164,7 +165,7 @@ public class UserUI {
         });
     }
 
-    // Display for User Details
+    // Shows detailed information for a selected user
     private void showUserDetails(User user) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("User Details");
