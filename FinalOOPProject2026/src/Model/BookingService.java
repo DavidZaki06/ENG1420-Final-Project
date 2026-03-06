@@ -12,12 +12,20 @@ public class BookingService {
         }
         //booking limits by user-type
 String type = user.getUserType()
-if(type == "Student" && user.getBookingLimit() >= 3) {
-    throw new IllegalArgumentException("Booking limit reached.");
-}else if(type == "Staff" && user.getBookingLimit() >= 5) {
-    throw new IllegalArgumentException("Booking limit reached.");
-}else if(type == "Guest" && user.getBookingLimit() >= 1) {
-    throw new IllegalArgumentException("Booking limit reached.");
+    
+// Count user's confirmed bookings
+        int confirmedCount = 0;
+        for (Booking booking : event.getConfirmedBookings()) {
+            if (booking.getUserId().equals(user)) {
+                confirmedCount++;
+            }
+        }
+if(type.equals("Student") && confirmedCount >= 3) {
+    throw new IllegalArgumentException("Booking limit reached.");
+}else if(type.equals("Staff") && confirmedCount >= 5) {
+    throw new IllegalArgumentException("Booking limit reached.");
+}else if(type.equals("Guest") && confirmedCount >= 1) {
+    throw new IllegalArgumentException("Booking limit reached.");
 }
         // capacity-based confirmed/waitlist placement
         int capacity = event.getCapacity();
