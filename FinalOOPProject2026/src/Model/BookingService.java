@@ -11,7 +11,7 @@ public class BookingService {
             throw new IllegalArgumentException("User already booked.");
         }
         //booking limits by user-type
-String type = user.getUserType()
+String type = user.getUserType();
     
 // Count user's confirmed bookings
         int confirmedCount = 0;
