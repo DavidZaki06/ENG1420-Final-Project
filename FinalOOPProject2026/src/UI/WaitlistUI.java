@@ -108,7 +108,8 @@ public class WaitlistUI {
         buttonPanel.getChildren().addAll(viewBtn, removeBtn, refreshBtn);
         view.setBottom(buttonPanel);
     }
-
+    
+     // Updates the waitlist display for the selected even
     private void updateWaitlistDisplay() {
         Event selectedEvent = eventCombo.getValue();
 
@@ -137,7 +138,7 @@ public class WaitlistUI {
             return;
         }
 
-        // Format each waitlisted booking
+        // Display each waitlisted user with position and timestamp
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         int position = 1;
 
@@ -152,6 +153,7 @@ public class WaitlistUI {
         }
     }
 
+    // Removes a user from the waitlist
     private void removeFromWaitlist() {
         Event selectedEvent = eventCombo.getValue();
 
@@ -173,7 +175,6 @@ public class WaitlistUI {
         ButtonType removeButton = new ButtonType("Remove", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(removeButton, ButtonType.CANCEL);
 
-        // Create list of waitlisted users
         ListView<String> userList = new ListView<>();
         userList.setPrefHeight(200);
 
