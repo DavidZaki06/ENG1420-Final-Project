@@ -31,23 +31,20 @@ public class BookingUI {
         refreshTable();
     }
 
-    /**
-     * Connects this UI to the shared users list from MainUI
-     */
+ 
+    // Connects this UI to the shared users list from MainUI
     public void setUsers(ArrayList<User> userList) {
         this.users = userList;
     }
 
-    /**
-     * Connects this UI to the shared events list from MainUI
-     */
+   
+    // Connects this UI to the shared events list from MainUI
     public void setEvents(ArrayList<Event> eventList) {
         this.events = eventList;
     }
 
-    /**
-     * Sets up the main layout for the Booking Management panel
-     */
+   
+    // Sets up the main layout for the Booking Management panel
     private void initialize() {
         view = new BorderPane();
         view.setPadding(new Insets(10));
@@ -59,9 +56,8 @@ public class BookingUI {
         setupButtonPanel();
     }
 
-    /**
-     * Creates the table that displays all bookings
-     */
+    
+    // Table View
     private void setupTable() {
         tableView = new TableView<>();
 
@@ -95,9 +91,7 @@ public class BookingUI {
         view.setCenter(tableView);
     }
 
-    /**
-     * Creates the button panel at the bottom
-     */
+    // Button Panel
     private void setupButtonPanel() {
         HBox buttonPanel = new HBox(10);
         buttonPanel.setPadding(new Insets(10, 0, 0, 0));
