@@ -236,13 +236,7 @@ public class BookingUI {
                 }
 
                 // Create new booking
-                Booking newBooking = new Booking();
-                newBooking.Booking(
-                        bookingIdField.getText().trim(),
-                        selectedUser,
-                        selectedEvent,
-                        LocalDateTime.now()
-                );
+                Booking newBooking = new Booking(bookingIdField.getText().trim(), selectedUser, selectedEvent, LocalDateTime.now());
 
                 // Determine if confirmed or waitlisted based on capacity
                 int availableCapacity = selectedEvent.getCapacity() - selectedEvent.getConfirmedBookings().size();

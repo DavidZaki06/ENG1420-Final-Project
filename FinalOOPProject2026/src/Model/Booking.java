@@ -4,24 +4,25 @@ import java.time.LocalDateTime;
 
 public class Booking {
     String bookingId;
-    User userId;
+    User user;
     Event event;
     LocalDateTime createdAt;
     BookingStatus status;
 
     public Booking() {
     }
-    public Booking(String bookingId, User userId, Event event, LocalDateTime createdAt) {
+    public Booking(String bookingId, User user, Event event, LocalDateTime createdAt) {
         this.bookingId = bookingId;
-        this.userId = userId;
+        this.user = user;
         this.event = event;
         this.createdAt = createdAt;
+        this.status = BookingStatus.WAITLISTED;
     }
     public String getBookingId(){
         return bookingId;
     }
     public User getUserId(){
-        return userId;
+        return user;
     }
     public Event getEvent(){
         return event;

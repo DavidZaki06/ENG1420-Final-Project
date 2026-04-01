@@ -6,37 +6,41 @@ import Model.Event;
 public class BookingService {
 
     public void createdBooking(Booking b, User user, Event event){
-        // no duplicates
+        // prevent duplicates
         if (alreadyBooked(user, event)){
             throw new IllegalArgumentException("User already booked.");
         }
         //booking limits by user-type
-String type = user.getUserType();
-    
-// Count user's confirmed bookings
+        String type = user.getUserType();
+
+        // Count user's confirmed bookings
         int confirmedCount = 0;
         for (Booking booking : event.getConfirmedBookings()) {
             if (booking.getUserId().equals(user)) {
                 confirmedCount++;
             }
         }
-if(type.equals("Student") && confirmedCount >= 3) {
-    throw new IllegalArgumentException("Booking limit reached.");
-}else if(type.equals("Staff") && confirmedCount >= 5) {
-    throw new IllegalArgumentException("Booking limit reached.");
-}else if(type.equals("Guest") && confirmedCount >= 1) {
-    throw new IllegalArgumentException("Booking limit reached.");
-}
-        // capacity-based confirmed/waitlist placement
+        // check booking limits
+        if(type.equals("Student") && confirmedCount >= 3) {
+            throw new IllegalArgumentException("Booking limit reached.");
+        }else if(type.equals("Staff") && confirmedCount >= 5) {
+            throw new IllegalArgumentException("Booking limit reached.");
+        }else if(type.equals("Guest") && confirmedCount >= 1) {
+            throw new IllegalArgumentException("Booking limit reached.");
+        }
+        // capacity-based confirmed/waitlist placement & add booking to correct list
         int capacity = event.getCapacity();
         if (event.getConfirmedBookings().size() < capacity){
             b.setStatus(BookingStatus.CONFIRMED);
+            event.addConfirmedBooking(b);
         }else{
             b.setStatus(BookingStatus.WAITLISTED);
+            event.addToWaitlist(b);
         }
+
     }
-    public void cancelBooking(Booking b){
-        b.cancel();
+    public void cancelBooking(Booking b, Event event){
+        event.cancelABooking(b);
     }
     // display all bookings
     public void viewBookings(){
