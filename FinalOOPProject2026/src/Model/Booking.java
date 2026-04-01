@@ -9,7 +9,9 @@ public class Booking {
     LocalDateTime createdAt;
     BookingStatus status;
 
-    public void Booking(String bookingId, User userId, Event event, LocalDateTime createdAt) {
+    public Booking() {
+    }
+    public Booking(String bookingId, User userId, Event event, LocalDateTime createdAt) {
         this.bookingId = bookingId;
         this.userId = userId;
         this.event = event;
