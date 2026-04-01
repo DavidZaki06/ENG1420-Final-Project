@@ -31,19 +31,19 @@ public class BookingUI {
         refreshTable();
     }
 
- 
+
     // Connects this UI to the shared users list from MainUI
     public void setUsers(ArrayList<User> userList) {
         this.users = userList;
     }
 
-   
+
     // Connects this UI to the shared events list from MainUI
     public void setEvents(ArrayList<Event> eventList) {
         this.events = eventList;
     }
 
-   
+
     // Sets up the main layout for the Booking Management panel
     private void initialize() {
         view = new BorderPane();
@@ -56,7 +56,7 @@ public class BookingUI {
         setupButtonPanel();
     }
 
-    
+
     // Table View
     private void setupTable() {
         tableView = new TableView<>();
@@ -334,21 +334,21 @@ public class BookingUI {
         });
     }
 
-    
+
     // Connects this UI to the shared bookings list from MainUI
     public void setBookings(ArrayList<Booking> bookingList) {
         this.bookings = bookingList;
         refreshTable();
     }
 
-   
+
     // Refreshes the table with current booking data
     private void refreshTable() {
         bookingData.clear();
         bookingData.addAll(bookings);
     }
 
-   
+
     // Shows a simple alert dialog
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
