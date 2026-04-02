@@ -1,0 +1,7 @@
+eventId,title,dateTime,location,capacity,status,eventType,topic,speakerName,ageRestriction
+E101,Intro to Git,2026-02-12T14:30,Library 101,40,Active,Workshop,Version Control,,
+E102,Advanced Java,2026-02-15T10:00,Room 202,25,Active,Workshop,OOP Design,,
+E205,AI Safety Talk,2026-03-01T10:00,MACN 113,120,Active,Seminar,,Dr. Noor,
+E206,Data Science Trends,2026-03-05T14:00,UC 442,80,Active,Seminar,,Prof. Lee,
+E330,Winter Concert,2026-03-10T19:00,UC Hall,300,Active,Concert,,,18+
+E331,Summer Jazz,2026-03-15T20:00,Main Stage,150,Active,Concert,,,All Ages

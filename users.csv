@@ -1,0 +1,6 @@
+userId,name,email,userType
+U001,Alice Smith,alice@uoguelph.ca,Student
+U002,Dr. Wilson,wilson@uoguelph.ca,Staff
+U003,Bob Guest,bob@gmail.com,Guest
+U004,Charlie Brown,charlie@uoguelph.ca,Student
+U005,Prof. Davis,davis@uoguelph.ca,Staff
