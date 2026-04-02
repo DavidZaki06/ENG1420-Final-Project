@@ -147,7 +147,8 @@ public class MainUI extends Application {
     private void showWaitlistManagement() {
         contentArea.getChildren().clear();
         contentArea.getChildren().add(waitlistUI.getView());
-        waitlistUI.refresh();
+        waitlistUI.refreshEvents();  // Refresh the combo box
+        waitlistUI.refresh();        // Refresh the display
     }
 
     public static void main(String[] args) {

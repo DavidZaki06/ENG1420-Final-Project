@@ -27,9 +27,9 @@ public class WaitlistUI {
         initialize();
     }
 
-    // Method to set events from EventUI
     public void setEvents(ArrayList<Event> eventList) {
         this.events = eventList;
+
         eventCombo.setItems(FXCollections.observableArrayList(events));
         eventCombo.setCellFactory(lv -> new ListCell<Event>() {
             @Override
@@ -45,6 +45,10 @@ public class WaitlistUI {
                 setText(empty ? null : event.getEventId() + " - " + event.getTitle());
             }
         });
+
+        // Force update the display
+        updateWaitlistDisplay();
+        eventCombo.setVisibleRowCount(10);
     }
 
     // Method to set bookings from BookingUI
@@ -111,6 +115,7 @@ public class WaitlistUI {
     
      // Updates the waitlist display for the selected even
     private void updateWaitlistDisplay() {
+
         Event selectedEvent = eventCombo.getValue();
 
         if (selectedEvent == null) {
@@ -270,6 +275,12 @@ public class WaitlistUI {
 
     public Node getView() {
         return view;
+    }
+
+    public void refreshEvents() {
+        eventCombo.setItems(FXCollections.observableArrayList(events));
+        eventCombo.setVisibleRowCount(10);
+        updateWaitlistDisplay();
     }
 
     public void refresh() {
