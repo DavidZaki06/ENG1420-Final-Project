@@ -10,13 +10,24 @@ import javafx.scene.layout.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+/*
+ WaitlistUI is the interface layer for waitlist management.
+
+ Responsibilities:
+ - let the user choose an event
+ - display the selected event’s waitlist
+ - show waitlist positions, users, and booking times
+ - allow manual removal from waitlist
+ - show promotion notifications when a user moves from waitlist to confirmed
+*/
+
 public class WaitlistUI {
     private BorderPane view;
     private ListView<String> waitlistView;
     private ComboBox<Event> eventCombo;
     private Label eventInfoLabel;
 
-    // Need access to events and bookings
+    // Shared data passed in from MainUI
     private ArrayList<Event> events;
     private ArrayList<Booking> bookings;
 
@@ -24,13 +35,18 @@ public class WaitlistUI {
         this.events = new ArrayList<>();
         this.bookings = new ArrayList<>();
 
+        // Build the waitlist screen when the class is created
         initialize();
     }
 
+    /*
+     Receives the shared events list from MainUI
+     and loads those events into the dropdown menu.
+    */
     public void setEvents(ArrayList<Event> eventList) {
         this.events = eventList;
 
-        eventCombo.setItems(FXCollections.observableArrayList(events));
+        eventCombo.setItems(FXCollections.observableArrayList(events)); // Controls how events appear inside the dropdown list
         eventCombo.setCellFactory(lv -> new ListCell<Event>() {
             @Override
             protected void updateItem(Event event, boolean empty) {
@@ -40,7 +56,7 @@ public class WaitlistUI {
         });
         eventCombo.setButtonCell(new ListCell<Event>() {
             @Override
-            protected void updateItem(Event event, boolean empty) {
+            protected void updateItem(Event event, boolean empty) { // Controls how events appear inside the dropdown list
                 super.updateItem(event, empty);
                 setText(empty ? null : event.getEventId() + " - " + event.getTitle());
             }
@@ -51,12 +67,15 @@ public class WaitlistUI {
         eventCombo.setVisibleRowCount(10);
     }
 
-    // Method to set bookings from BookingUI
+    /*
+     Receives the shared bookings list from MainUI.
+     Not heavily used here, but available if needed.
+    */
     public void setBookings(ArrayList<Booking> bookingList) {
         this.bookings = bookingList;
     }
 
-    private void initialize() {
+    private void initialize() { //Builds the full waitlist management screen.
         view = new BorderPane();
         view.setPadding(new Insets(10));
 
@@ -77,11 +96,11 @@ public class WaitlistUI {
         eventCombo.setOnAction(e -> updateWaitlistDisplay());
 
         Button refreshBtn = new Button("Refresh");
-        refreshBtn.setOnAction(e -> updateWaitlistDisplay());
+        refreshBtn.setOnAction(e -> updateWaitlistDisplay()); // Update display whenever a different event is selected
 
         selectorBox.getChildren().addAll(selectLabel, eventCombo, refreshBtn);
 
-        eventInfoLabel = new Label("No event selected");
+        eventInfoLabel = new Label("No event selected"); // Shows event summary information above the waitlist
         eventInfoLabel.setStyle("-fx-font-style: italic;");
 
         topPanel.getChildren().addAll(titleLabel, selectorBox, eventInfoLabel);
@@ -96,6 +115,14 @@ public class WaitlistUI {
         setupButtonPanel();
     }
 
+    /*
+     Creates bottom action buttons for the waitlist screen.
+
+     Buttons:
+     - View Waitlist
+     - Remove from Waitlist
+     - Refresh
+    */
     private void setupButtonPanel() {
         HBox buttonPanel = new HBox(10);
         buttonPanel.setPadding(new Insets(10, 0, 0, 0));
@@ -112,8 +139,16 @@ public class WaitlistUI {
         buttonPanel.getChildren().addAll(viewBtn, removeBtn, refreshBtn);
         view.setBottom(buttonPanel);
     }
-    
-     // Updates the waitlist display for the selected even
+
+    /*
+    Updates the waitlist display for the currently selected event.
+
+    This method:
+    - checks if an event is selected
+    - shows event details
+    - displays waitlist entries with position and time
+    - handles empty waitlist cases
+   */
     private void updateWaitlistDisplay() {
 
         Event selectedEvent = eventCombo.getValue();
@@ -143,11 +178,11 @@ public class WaitlistUI {
             return;
         }
 
-        // Display each waitlisted user with position and timestamp
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); // Format booking times neatly for display
         int position = 1;
 
-        for (Booking booking : selectedEvent.getWaitlist()) {
+        for (Booking booking : selectedEvent.getWaitlist()) { // Display each waitlisted booking with its position
             String entry = String.format("%d. %s - %s (Booked: %s)",
                     position++,
                     booking.getUserId().getName(),
@@ -158,7 +193,17 @@ public class WaitlistUI {
         }
     }
 
-    // Removes a user from the waitlist
+    /*
+     Allows the user to manually remove a booking from the waitlist.
+
+     This method:
+     - checks if an event is selected
+     - checks if the waitlist is empty
+     - opens a dialog showing current waitlist entries
+     - removes the selected booking
+     - updates booking status to CANCELLED
+     - refreshes the display
+    */
     private void removeFromWaitlist() {
         Event selectedEvent = eventCombo.getValue();
 
@@ -198,6 +243,10 @@ public class WaitlistUI {
 
         dialog.getDialogPane().setContent(userList);
 
+        /*
+         Converts the selected row in the popup
+         back into the actual Booking object from the waitlist.
+        */
         dialog.setResultConverter(button -> {
             if (button == removeButton) {
                 int selectedIndex = userList.getSelectionModel().getSelectedIndex();
@@ -234,7 +283,10 @@ public class WaitlistUI {
         });
     }
 
-    // Method to show promotion notification (called from BookingUI)
+    /*
+         Converts the selected row in the popup
+         back into the actual Booking object from the waitlist.
+        */
     public void showPromotionNotification(Booking promotedBooking) {
         if (promotedBooking == null) return;
 
@@ -264,6 +316,7 @@ public class WaitlistUI {
         }
     }
 
+    //Helper method for showing simple popup messages.
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -273,10 +326,15 @@ public class WaitlistUI {
     }
 
 
+    //Helper method for showing simple popup messages.
     public Node getView() {
         return view;
     }
 
+    /*
+     Refreshes the event dropdown and the waitlist display.
+     Useful when event data changes elsewhere in the system.
+    */
     public void refreshEvents() {
         eventCombo.setItems(FXCollections.observableArrayList(events));
         eventCombo.setVisibleRowCount(10);
