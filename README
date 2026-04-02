@@ -115,7 +115,7 @@ Assumptions
 How to Run the Program
 1) Open the project in IntelliJ (or any Java IDE).
 2) Ensure all files are inside the src directory.
-3) Run Main.java.
+3) Run src/main/java/UI/MainUI.java.
 4) Use the console menu to navigate through system features.
 
 
