@@ -151,7 +151,11 @@ and the latter was entered as a collaborator.
 
 - How to Run the Program
 Launch the project in IntelliJ IDEA or any other Java IDE. Have all source files contained within the src directory. Execute the file
-in the UI package, MainUI.java.
+in the UI package, src/main/java/UI/MainUI.java.
+
+- How to Run the Test Suite
+Launch the project in IntelliJ IDEA or any other Java IDE. Have all source files contained within the src directory. Execute the file
+in the Test package, src/test/java/JUnitTests.java.
 
 The system loads users.csv, events.csv and bookings.csv as the application starts and restores the system state.
 
