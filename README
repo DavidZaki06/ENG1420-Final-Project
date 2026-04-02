@@ -1,0 +1,128 @@
+📌 Project Overview
+
+This project implements a Campus Event Management System using Java and Object-Oriented Programming principles.
+
+Phase 1 includes the complete implementation of:
+- 1.1 User Management
+- 1.2 Event Management
+- 1.3 Booking Management
+- 1.4 Waitlist Management
+
+The system allows administrators to manage users, create and maintain events, process bookings, enforce capacity rules, and maintain waitlists using a menu-driven console interface.
+-All data is stored in memory (no database).-
+
+1) Modules and Features
+
+1.1 User Management
+The User Management module maintains the system’s user registry and provides the identity layer required for booking operations.
+Supported User Types
+         - Student
+         - Staff
+         - Guest
+User Attributes
+         - userId (unique)
+         - name
+         - email
+         - userType
+Features
+- Create a user (prevent duplicate userIds)
+- View user details (including confirmed bookings summary)
+- List all users in readable format
+
+1.2 Event Management
+The Event Management module handles the creation and administration of campus events.
+Supported Event Types
+               - Workshop
+               - Seminar
+               - Concert
+Common Event Attributes
+               - eventId (unique)
+               - title
+               - dateTime
+               - location
+               - capacity (must be > 0)
+               - status (Active / Cancelled)
+Type-Specific Fields
+               - Workshop → topic
+               - Seminar → speakerName
+               - Concert → ageRestriction (display only)
+Features
+- Create an event (validate capacity and prevent duplicate eventIds)
+- Update event details while maintaining valid state
+- Cancel an event:
+All confirmed and waitlisted bookings become Cancelled
+Waitlist is cleared
+- List all events
+- Search by title (partial and case-insensitive)
+- Filter by event type
+
+1.3 Booking Management
+The Booking Management module connects users to events while enforcing capacity and policy rules.
+Booking Attributes
+              - bookingId (unique)
+              - userId
+              - eventId
+              - createdAt
+              - bookingStatus (Confirmed / Waitlisted / Cancelled)
+
+Booking Rules
+- A user cannot book the same event twice.
+- If capacity is available → booking is Confirmed.
+- If event is full → booking is Waitlisted.
+- If a confirmed booking is cancelled → first waitlisted booking is promoted automatically.
+
+Booking limits:
+- Student → max 3 Confirmed bookings
+- Staff → max 5 Confirmed bookings
+- Guest → max 1 Confirmed booking
+- Concert ageRestriction is informational only (not enforced).
+
+Features
+- Book an event (enforce all rules)
+- Cancel a booking (with automatic promotion logic)
+- View a user’s bookings
+- View event roster:
+      Confirmed list
+      Waitlist (correct order)
+
+1.4 Waitlist Management
+The Waitlist Management module ensures correct first-come, first-served behavior.
+Features
+- Add booking to waitlist when event is full
+- Maintain correct order of waitlisted users
+- View waitlist with user details and timestamps
+- Remove from waitlist upon cancellation
+- Automatically promote first waitlisted booking when:
+      A confirmed booking is cancelled, or
+      Capacity increases
+- Prevent duplicate waitlist entries
+- Clear waitlist when event is cancelled
+
+
+The system demonstrates:
+- Encapsulation (private fields with getters/setters)
+- Inheritance (User and Event subclasses)
+- Abstraction (base classes for shared structure)
+- Polymorphism (handling users/events through base types)
+- Proper use of collections (ArrayList, Queue)
+
+Assumptions
+- Data is stored in memory only.
+- The system is admin-operated.
+- No external libraries or database connections are used.
+
+               
+How to Run the Program
+1) Open the project in IntelliJ (or any Java IDE).
+2) Ensure all files are inside the src directory.
+3) Run Main.java.
+4) Use the console menu to navigate through system features.
+
+
+
+
+
+
+
+
+
