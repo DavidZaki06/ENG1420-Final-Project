@@ -1,122 +1,168 @@
-📌 Project Overview
+Project Overview:
 
-This project implements a Campus Event Management System using Java and Object-Oriented Programming principles.
+In this project, a Campus Event Booking System is designed based on Java
+and object oriented programming principles and a graphical user interface based
+on the JavaFX. The system simulates the life cycle of campus events and
+reservations, enabling the administrators to handle users, create and maintain events,
+accept and process bookings, impose booking constraints, and handle waitlists.
 
-Phase 1 includes the complete implementation of:
-- 1.1 User Management
-- 1.2 Event Management
-- 1.3 Booking Management
-- 1.4 Waitlist Management
+Phase 1 deployed the fundamental system architecture comprising of user hierarchy,
+event hierarchy, booking workflow and waitlist logic. Phase 2 builds upon the system
+to a full application with CSV file loading, graphical interface navigation between
+modules, waitlist promotion notifications, search and filtering capability, and test support.
 
-The system allows administrators to manage users, create and maintain events, process bookings, enforce capacity rules, and maintain waitlists using a menu-driven console interface.
--All data is stored in memory (no database).-
+Starter datasets are loaded automatically when the application is started to ensure the system
+starts in a realistic predefined state instead of having to enter the data manually.
 
-1) Modules and Features
+System Architecture:
 
-1.1 User Management
-The User Management module maintains the system’s user registry and provides the identity layer required for booking operations.
-Supported User Types
-         - Student
-         - Staff
-         - Guest
-User Attributes
-         - userId (unique)
-         - name
-         - email
-         - userType
-Features
-- Create a user (prevent duplicate userIds)
-- View user details (including confirmed bookings summary)
-- List all users in readable format
+The design in this project is a Campus Event Booking System that is developed using Java
+and object oriented programming concepts and JavaFX developing graphical user interface.
+The system is a simulated life cycle of the campus events and reservations, and it allows
+the administrators to manage users, create events, maintain events, accept and process
+bookings, impose booking constraints and manage waitlists.
 
-1.2 Event Management
-The Event Management module handles the creation and administration of campus events.
-Supported Event Types
-               - Workshop
-               - Seminar
-               - Concert
-Common Event Attributes
-               - eventId (unique)
-               - title
-               - dateTime
-               - location
-               - capacity (must be > 0)
-               - status (Active / Cancelled)
-Type-Specific Fields
-               - Workshop → topic
-               - Seminar → speakerName
-               - Concert → ageRestriction (display only)
-Features
-- Create an event (validate capacity and prevent duplicate eventIds)
-- Update event details while maintaining valid state
-- Cancel an event:
-All confirmed and waitlisted bookings become Cancelled
-Waitlist is cleared
-- List all events
-- Search by title (partial and case-insensitive)
-- Filter by event type
+Phase 1 deployed the fundamental system architecture comprising of user hierarchy,
+event hierarchy, booking workflow and waitlist logic. Phase 2 builds upon the system
+to a full application with CSV file loading, graphical interface navigation between modules,
+waitlist promotion notifications, search and filtering capability, and test support.
 
-1.3 Booking Management
-The Booking Management module connects users to events while enforcing capacity and policy rules.
-Booking Attributes
-              - bookingId (unique)
-              - userId
-              - eventId
-              - createdAt
-              - bookingStatus (Confirmed / Waitlisted / Cancelled)
+To get the system into a realistic predefined state, starter datasets are loaded automatically when the
+application starts rather than forcing the user to enter the data himself.
 
-Booking Rules
-- A user cannot book the same event twice.
-- If capacity is available → booking is Confirmed.
-- If event is full → booking is Waitlisted.
-- If a confirmed booking is cancelled → first waitlisted booking is promoted automatically.
+CSV Data Loading:
 
-Booking limits:
-- Student → max 3 Confirmed bookings
-- Staff → max 5 Confirmed bookings
-- Guest → max 1 Confirmed booking
-- Concert ageRestriction is informational only (not enforced).
+When the system is started, it reads three input files:
 
-Features
-- Book an event (enforce all rules)
-- Cancel a booking (with automatic promotion logic)
-- View a user’s bookings
-- View event roster:
-      Confirmed list
-      Waitlist (correct order)
+users.csv
+events.csv
+bookings.csv
 
-1.4 Waitlist Management
-The Waitlist Management module ensures correct first-come, first-served behavior.
-Features
-- Add booking to waitlist when event is full
-- Maintain correct order of waitlisted users
-- View waitlist with user details and timestamps
-- Remove from waitlist upon cancellation
-- Automatically promote first waitlisted booking when:
-      A confirmed booking is cancelled, or
-      Capacity increases
-- Prevent duplicate waitlist entries
-- Clear waitlist when event is cancelled
+These files are read by the FileLoader which automatically recreates all system objects.
+Using the booking status and timestamp values in the dataset, confirmed bookings,
+waitlisted bookings, cancelled bookings and event rosters are restored.
 
+The createdAt timestamp is used to rebuild waitlists to keep it first come first served.
 
-The system demonstrates:
-- Encapsulation (private fields with getters/setters)
-- Inheritance (User and Event subclasses)
-- Abstraction (base classes for shared structure)
-- Polymorphism (handling users/events through base types)
-- Proper use of collections (ArrayList, Queue)
+This enables the application to start running with an already initialized dataset.
 
-Assumptions
-- Data is stored in memory only.
-- The system is admin-operated.
-- No external libraries or database connections are used.
+Modules and Features:
 
-               
-How to Run the Program
-1) Open the project in IntelliJ (or any Java IDE).
-2) Ensure all files are inside the src directory.
-3) Run src/main/java/UI/MainUI.java.
-4) Use the console menu to navigate through system features.
+- User Management
+All system users are recorded in the User Management module. There are three types
+of users that are supported by the system including Student, Staff, and Guest.
+
+A user has a distinct userId, name, email and user type.
+
+The module enables an administrator to add users, avoid duplication of userids,
+access a summary of individual user information, show a summary of confirmed
+bookings, and the list of all users in readable format.
+
+- Event Management
+The Event Management module deals with the development and maintenance of
+campus events. The system is compatible with Seminar, Workshop and Concert event types.
+
+Each event has an eventId, title, date and time, location, capacity, status and a type specific field.
+
+A topic field is stored in workshop events. Store Name of a speaker in seminar events.
+An informational ageRestriction field is stored in the concert events.
+
+Administrators are able to add events, edit event details, cancel events, view list of events, search
+events by title, filter events by type, as well as, view event roster with confirmed bookings and waitlists.
+
+In the case of an event being canceled, all the confirmed and waitlisted bookings get cancelled
+automatically and the waitlist gets removed.
+
+- Booking Management
+The Booking Management module links users and events and implements booking regulations and capacity constraints.
+
+Every booking has a bookingId, userid, eventid, createdAt time, and booking status.
+
+The booking regulations make sure that a user is not allowed to book an event twice.
+When there is space in the event the booking is confirmed. In case the event is already
+booked, then it is waitlisted. When a confirmed booking is cancelled the first waitlisted
+booking is automatically promoted.
+
+A user type has varying booking limits. Students can have three confirmed bookings.
+Employees are allowed to make five reservations. Visitors are allowed to make one reservation.
+
+The module enables the administrators to make bookings, cancel bookings, see bookings made by the user
+and see event rosters divided into confirmed and waitlisted.
+
+When the promotion takes place, automatic waitlist promotion messages are shown in the user interface.
+
+- Waitlist Management
+The Waitlist Management module maintains the ordering and integrity of waitlists for each event.
+
+When events reach capacity additional bookings are placed on the waitlist in timestamp order. The
+system ensures waitlists follow a first come first served structure and prevents duplicate waitlist entries.
+
+Administrators can view event waitlists including user details and timestamps,
+remove waitlisted bookings, and observe promotion notifications when waitlisted users become confirmed.
+
+When an event is cancelled the waitlist is cleared automatically.
+
+- User Interface Design
+The graphical interface has a navigation panel which will offer access to User Management, Event Management,
+Booking Management and Waitlist Management modules.
+
+All the modules provide the information in the form of structured lists and tables.
+Forms enable the administrators to create users, create events, and create bookings.
+Status updates can be shown as soon as the booking changes are made.
+
+Waitlist Management panel shows waitlist position, user details, booking time, and event summary details. Promotion
+messages are shown when they are moved off the waitlist into the confirmed section.
+
+- Data Persistence Support
+On application startup, the system reads starter data in CSV files using the FileLoader class. Users, events,
+bookings, waitlists and booking status values are automatically restored by these files.
+
+The architecture aids in the reconstruction of the full system state among
+program executions and guarantees that the order of waitlists is maintained through
+the reconstruction with the help of timestamps.
+
+- Testing and Validation
+The project has a list of test scenarios that authenticate booking workflow logic.
+
+Examples of test cases are checking bookings when the capacity is available,
+bookings on a waitlist when events are full, promoting waitlisted bookings following
+cancellations, and duplicate bookings.
+
+The tests are certain that booking rules and waitlist behavior are working properly.
+
+- Object Oriented Programming Concepts Demonstrated
+This system is encapsulated in terms of private attributes and getter setter methods.
+Implementation of inheritance is based on Student, Staff and Guest subclasses and Workshop,
+Seminar and Concert subclasses. Base User and Event classes are used to describe abstraction.
+Polymorphism enables base class references to be used to deal with users and events.
+
+ArrayList and Queue collections are utilized to handle users, events, bookings, and waitlists.
+
+-GitHub Submission Requirements
+The repository of the project has incremental commits of the development showing
+it is progressing towards the two phases of the project. The repository contains at least ten
+commits which have descriptive commit messages detailing the development efforts.
+
+Examples of commit messages are adding the event hierarchy, adding booking service logic,
+adding waitlist promotion functionality, adding CSV loading, and adding Waitlist Management interface.
+
+Before submission all group members and the teaching assistant entered the repository
+and the latter was entered as a collaborator.
+
+- How to Run the Program
+Launch the project in IntelliJ IDEA or any other Java IDE. Have all source files contained within the src directory. Execute the file
+in the UI package, MainUI.java.
+
+The system loads users.csv, events.csv and bookings.csv as the application starts and restores the system state.
+
+The navigation panel will allow you to access user management, event management, booking management, and waitlist management features.
+
+- Assumptions
+The system is administrator operated. CSV datasets can be started at runtime. The values of age restriction on
+concerts are not binding, but only informational and are not implemented as a rule in booking. During execution,
+bookings are held in memory. Booking timestamps are used to determine waitlist ordering. The graphical interface
+displays the updates on booking status as soon as they have been changed.
+
 
 
 
